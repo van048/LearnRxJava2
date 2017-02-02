@@ -2,6 +2,7 @@ package cn.ben.learnrxjava2;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +14,12 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
+import io.reactivex.schedulers.Schedulers;
 
 @SuppressWarnings("UnusedAssignment")
 public class MainActivity extends AppCompatActivity {
@@ -164,5 +167,22 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println((String) s);
             }
         });
+
+        Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(ObservableEmitter<Integer> e) throws Exception {
+                Log.d("所在的线程：", Thread.currentThread().getName());
+                Log.d("发送的数据:", 1 + "");
+                e.onNext(1);
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.d("所在的线程：", Thread.currentThread().getName());
+                        Log.d("接收到的数据:", "integer:" + integer);
+                    }
+                });
     }
 }
